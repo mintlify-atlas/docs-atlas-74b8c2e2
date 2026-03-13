@@ -1,0 +1,283 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for whecho
+---
+
+## Common Errors
+
+### Config Not Initialized
+
+<Warning>
+**Error:** `whecho is not initialized with a default url. Please run whecho --init to initialize whecho.`
+</Warning>
+
+This error occurs when you try to send a message without initializing whecho first.
+
+**Solution:**
+
+Run the initialization command:
+
+```bash
+whecho --init
+```
+
+This will create a configuration file and prompt you to set your default webhook URL.
+
+**Location:** The error check is in `_utilities.py:36`
+
+---
+
+### No URL Passed
+
+<Warning>
+**Error:** `No URL passed. Did you run whecho --init?`
+</Warning>
+
+This error is raised when no webhook URL is provided and no default URL is configured.
+
+**Solutions:**
+
+1. **Set a default URL** by running `whecho --init`
+2. **Provide a URL** with the `-u` flag:
+   ```bash
+   whecho -u "https://your-webhook-url.com" "Your message"
+   ```
+
+**Location:** Error raised in `_send_message.py:13`
+
+---
+
+### No Message Passed
+
+<Warning>
+**Error:** `No message passed. Try whecho --help for more info.`
+</Warning>
+
+This error occurs when you run whecho without providing a message to send.
+
+**Solutions:**
+
+1. **Pass a message as an argument:**
+   ```bash
+   whecho "Your message here"
+   ```
+
+2. **Use the `-m` flag:**
+   ```bash
+   whecho -m "Your message here"
+   ```
+
+**Location:** Error raised in `_send_message.py:15` and `_utilities.py:49`
+
+---
+
+### HTTP Connection Errors
+
+<Warning>
+**Error:** `requests.exceptions.HTTPError`
+</Warning>
+
+Connection errors can occur when:
+- The webhook URL is invalid or unreachable
+- The webhook has been disabled or deleted
+- Network connectivity issues
+- The webhook rate limit has been exceeded
+
+**Solutions:**
+
+1. **Enable debug mode** to see the full error:
+   ```bash
+   whecho -d "Test message"
+   ```
+
+2. **Verify your webhook URL** is correct:
+   ```bash
+   whecho --init
+   # Select 'default_url' and update it
+   ```
+
+3. **Test with a simple message:**
+   ```bash
+   whecho -u "https://your-webhook-url.com" "test"
+   ```
+
+4. **Check your network connection** and firewall settings
+
+**Location:** Error handling in `_send_message.py:24-25`
+
+---
+
+### Corrupted Config File
+
+<Warning>
+**Error:** `whecho config is corrupted. {key} not found. Loading default value...`
+</Warning>
+
+This warning appears when your config file is missing required fields.
+
+**Solution:**
+
+Reinitialize whecho to fix the configuration:
+
+```bash
+whecho --init
+```
+
+The tool will automatically load default values for missing keys, but it's best to reinitialize to ensure all settings are correct.
+
+**Location:** Config validation in `_config.py:88-89`
+
+---
+
+## Platform-Specific Issues
+
+### Windows getpass Errors
+
+<Info>
+On Windows systems, `getpass.getuser()` can sometimes fail during testing or in certain environments.
+</Info>
+
+**Solution:**
+
+whecho automatically handles this by catching the exception and using a default username of "user".
+
+**Location:** Handled in `_config.py:14-17`
+
+---
+
+### UTF-8 Encoding Issues
+
+<Info>
+If your terminal doesn't support UTF-8 encoding, the anchor emoji (⚓) in the description may not display correctly.
+</Info>
+
+**Solution:**
+
+whecho automatically detects your terminal's encoding and removes the emoji if UTF-8 is not supported. No action needed.
+
+**Location:** Encoding check in `whecho.py:13-15`
+
+---
+
+## Debugging Tips
+
+### Enable Debug Mode
+
+The `-d` or `--debug` flag provides detailed information about what whecho is doing:
+
+```bash
+whecho -d "Debug test message"
+```
+
+**Debug output includes:**
+- Parsed command-line arguments
+- Loaded configuration
+- Detected webhook platform
+- JSON data being sent
+- HTTP response object
+
+<Note>
+Debug mode is invaluable for troubleshooting connection issues and verifying your configuration.
+</Note>
+
+---
+
+### Check Your Config
+
+To view and modify your current configuration:
+
+```bash
+whecho --init
+```
+
+This displays all current settings:
+- `default_url`: Your default webhook URL
+- `user`: Username for messages
+- `machine`: Machine name (or "auto" for hostname)
+
+---
+
+### Config File Location
+
+If you need to manually inspect or delete your config file:
+
+**Linux:**
+```
+~/.config/.whecho/config.toml
+```
+
+**Windows:**
+```
+~\AppData\Roaming\.whecho\config.toml
+```
+
+**macOS:**
+```
+~/Library/Application Support/.whecho/config.toml
+```
+
+**Location reference:** `_config.py:26-28`
+
+---
+
+## Common Mistakes
+
+### Forgetting to Quote Messages with Spaces
+
+<Warning>
+Without quotes, only the first word will be sent.
+</Warning>
+
+**Wrong:**
+```bash
+whecho Build completed successfully
+# Only sends "Build"
+```
+
+**Correct:**
+```bash
+whecho "Build completed successfully"
+```
+
+---
+
+### Using Wrong URL Format
+
+Make sure you're using the complete webhook URL, including the protocol:
+
+**Wrong:**
+```bash
+whecho -u discord.com/api/webhooks/... "message"
+```
+
+**Correct:**
+```bash
+whecho -u https://discord.com/api/webhooks/... "message"
+```
+
+---
+
+### Modifying Read-Only Config Fields
+
+<Info>
+Some config fields cannot be modified: `version` and `os`
+</Info>
+
+These fields are automatically set and maintained by whecho. They won't appear in the modification menu.
+
+**Location:** Read-only fields defined in `_config.py:23`
+
+---
+
+## Need More Help?
+
+If you're still experiencing issues:
+
+1. **Check the [FAQ](/reference/faq)** for common questions
+2. **Enable debug mode** with `-d` flag to get detailed output
+3. **Verify your webhook URL** is active and accepting requests
+4. **Test with a minimal example** to isolate the issue
+
+<Note>
+When reporting issues, include the output from running your command with the `-d` flag (but remove any sensitive webhook URLs).
+</Note>

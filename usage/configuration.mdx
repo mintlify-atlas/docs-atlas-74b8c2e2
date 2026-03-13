@@ -1,0 +1,416 @@
+---
+title: Configuration
+description: Configure whecho with default webhooks and user settings
+---
+
+## Overview
+
+whecho uses a TOML configuration file to store your default webhook URL and user preferences. This eliminates the need to specify the webhook URL with every command.
+
+## Configuration File Location
+
+The config file location varies by operating system:
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    ~/.config/.whecho/config.toml
+    ```
+  </Tab>
+  
+  <Tab title="macOS">
+    ```bash
+    ~/Library/Application Support/.whecho/config.toml
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    ```bash
+    ~\AppData\Roaming\.whecho\config.toml
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  The configuration directory and file are created automatically when you run `whecho --init`.
+</Note>
+
+## First-Time Setup
+
+Before using whecho, you need to initialize the configuration:
+
+### Step 1: Obtain a Webhook URL
+
+Get a webhook URL from your preferred service:
+
+- **Discord**: [Create a webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+- **Slack**: [Create an incoming webhook](https://api.slack.com/messaging/webhooks)
+- **Microsoft Teams**: Create an incoming webhook connector
+- **Webex**: [Set up incoming webhook](https://apphub.webex.com/applications/incoming-webhooks-cisco-systems-38054-23307-75252)
+
+### Step 2: Run Initialization
+
+```bash
+whecho --init
+```
+
+You'll see an interactive configuration menu:
+
+```plaintext
+Current config:
+[1] default_url: None
+[2] user: craut
+[3] machine: craut-spectre
+
+Please enter the number/name of the config option you would like to modify (empty or Q to exit):
+```
+
+### Step 3: Set Default URL
+
+Enter `1` or `default_url` to set your webhook URL:
+
+```plaintext
+Please enter the number/name of the config option you would like to modify (empty or Q to exit): 1
+Please enter the new value for default_url: https://discord.com/api/webhooks/123456789/abcdefg
+Successfully modified default_url to https://discord.com/api/webhooks/123456789/abcdefg!
+```
+
+### Step 4: Complete Setup
+
+Press Enter or type `q` to exit:
+
+```plaintext
+Please enter the number/name of the config option you would like to modify (empty or Q to exit): q
+Successfully initialized whecho!
+```
+
+## Configuration Fields
+
+The config file contains the following fields:
+
+<ParamField path="default_url" type="string" default="None">
+  The default webhook URL to use when no `-u` flag is provided.
+  
+  **Modifiable**: Yes
+  
+  ```toml
+  default_url = "https://discord.com/api/webhooks/..."
+  ```
+  
+  <Warning>
+    This is the most important field. whecho cannot send messages without a configured URL.
+  </Warning>
+</ParamField>
+
+<ParamField path="user" type="string" default="<current username>">
+  The username that appears in webhook messages (for platforms like Discord).
+  
+  **Modifiable**: Yes  
+  **Auto-detected**: Yes (from system user)
+  
+  ```toml
+  user = "craut"
+  ```
+  
+  <Note>
+    For Discord webhooks, this appears as `username@machine` in the message.
+  </Note>
+</ParamField>
+
+<ParamField path="machine" type="string" default="auto">
+  The machine name that appears in webhook messages.
+  
+  **Modifiable**: Yes  
+  **Auto-detected**: Yes (from hostname when set to "auto")
+  
+  ```toml
+  machine = "auto"  # Uses hostname
+  # or
+  machine = "workstation"  # Custom name
+  ```
+  
+  When set to `"auto"`, whecho automatically uses `socket.gethostname()` at runtime.
+</ParamField>
+
+<ParamField path="version" type="string" default="<installed version>">
+  The installed version of whecho.
+  
+  **Modifiable**: No (read-only)  
+  **Auto-detected**: Yes
+  
+  ```toml
+  version = "0.4.0"
+  ```
+  
+  <Note>
+    This field is automatically set and cannot be modified through `--init`.
+  </Note>
+</ParamField>
+
+<ParamField path="os" type="string" default="<detected OS>">
+  The operating system name.
+  
+  **Modifiable**: No (read-only)  
+  **Auto-detected**: Yes
+  
+  ```toml
+  os = "Linux"  # or "Darwin", "Windows"
+  ```
+  
+  <Note>
+    This field is automatically set using `platform.system()` and cannot be modified.
+  </Note>
+</ParamField>
+
+## Example Configuration File
+
+```toml
+default_url = "https://discord.com/api/webhooks/123456789/abcdefghijklmnop"
+version = "0.4.0"
+user = "craut"
+os = "Linux"
+machine = "auto"
+```
+
+## Modifying Configuration
+
+You can modify your configuration at any time using the same initialization command:
+
+```bash
+whecho --init
+```
+
+### Interactive Modification
+
+When config already exists:
+
+```plaintext
+whecho is already initialized. Loading config file for changes
+Current config:
+[1] default_url: https://discord.com/api/webhooks/...
+[2] user: craut
+[3] machine: auto
+
+Please enter the number/name of the config option you would like to modify (empty or Q to exit):
+```
+
+### Modifying by Number
+
+```plaintext
+Please enter the number/name of the config option you would like to modify (empty or Q to exit): 2
+Please enter the new value for user: admin
+Successfully modified user to admin!
+```
+
+### Modifying by Name
+
+```plaintext
+Please enter the number/name of the config option you would like to modify (empty or Q to exit): machine
+Please enter the new value for machine: production-server
+Successfully modified machine to production-server!
+```
+
+## Manual Configuration
+
+You can also manually edit the config file:
+
+<Tabs>
+  <Tab title="Linux">
+    ```bash
+    nano ~/.config/.whecho/config.toml
+    ```
+  </Tab>
+  
+  <Tab title="macOS">
+    ```bash
+    nano ~/Library/Application\ Support/.whecho/config.toml
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    ```bash
+    notepad %APPDATA%\.whecho\config.toml
+    ```
+  </Tab>
+</Tabs>
+
+Then edit the TOML values directly:
+
+```toml
+default_url = "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX"
+user = "admin"
+machine = "production-server"
+```
+
+<Warning>
+  Do not modify the `version` or `os` fields manually, as they are managed automatically.
+</Warning>
+
+## Configuration Validation
+
+whecho automatically validates and repairs corrupted configuration:
+
+```python
+# From _config.py:78-89
+if check_init():
+    with open(CONFIG_PATH, 'r') as f:
+        config = toml.load(f)
+    # check if the config is not corrupted
+    for key in DEFAULT_CONFIG:
+        if key not in config:
+            print(f"whecho config is corrupted. {key} not found. Loading default value {DEFAULT_CONFIG[key]}. Please run whecho --init to fix this.")
+            config[key] = DEFAULT_CONFIG[key]
+```
+
+If a required field is missing, whecho will:
+1. Print a warning message
+2. Load the default value for that field
+3. Suggest running `whecho --init` to fix the config
+
+## Environment-Specific Settings
+
+### Development vs Production
+
+You can maintain different configurations by using the `-u` flag to override:
+
+```bash
+# Use default (production) webhook
+whecho "Production deployment complete"
+
+# Use development webhook
+whecho -u "$DEV_WEBHOOK_URL" "Development test message"
+```
+
+### Multiple Machine Setup
+
+If you use whecho on multiple machines, customize the `machine` field on each:
+
+```bash
+# On workstation
+whecho --init
+# Set machine to "workstation"
+
+# On server
+whecho --init
+# Set machine to "production-server"
+```
+
+Messages will show which machine sent them:
+
+```
+user@workstation: Local build completed
+user@production-server: Deployment successful
+```
+
+## Checking Configuration
+
+View your current configuration in debug mode:
+
+```bash
+whecho -d -m "Test"
+```
+
+Output:
+```plaintext
+Arguments passed: Namespace(version=False, msg='Test', message=[], init=False, url=None, debug=True)
+Config pulled from : /home/user/.config/.whecho/config.toml
+Config: {'default_url': 'https://discord.com/api/webhooks/...', 'version': '0.4.0', 'user': 'craut', 'os': 'Linux', 'machine': 'workstation'}
+Message: Test
+```
+
+## Configuration in Python API
+
+When using the Python API, configuration is loaded automatically:
+
+```python
+from whecho.whecho import whecho_simple
+
+# Uses default_url from config
+whecho_simple("Message using config")
+
+# Override with custom URL
+whecho_simple("Message to custom webhook", url="https://...")
+```
+
+The config loading logic (from `_config.py:78`):
+
+```python
+def get_config(debug=False):
+    """Returns the config file as a dictionary."""
+    if debug:
+        print(f"Config pulled from : {CONFIG_PATH}")
+    if check_init():
+        with open(CONFIG_PATH, 'r') as f:
+            config = toml.load(f)
+        # ... validation logic
+    else:
+        config = DEFAULT_CONFIG
+    if config['machine'] == 'auto':
+        config['machine'] = socket.gethostname()
+    return config
+```
+
+## Troubleshooting
+
+### Config Not Found
+
+If you see:
+```
+whecho is not initialized with a default url. Please run whecho --init to initialize whecho.
+```
+
+Run the initialization:
+```bash
+whecho --init
+```
+
+### Permission Errors
+
+If you can't write to the config directory:
+
+```bash
+# Check directory permissions
+ls -la ~/.config/.whecho/
+
+# Fix permissions if needed
+chmod 755 ~/.config/.whecho/
+chmod 644 ~/.config/.whecho/config.toml
+```
+
+### Corrupted Config
+
+If your config is corrupted, whecho will auto-repair missing fields. To fully reset:
+
+<Tabs>
+  <Tab title="Linux/macOS">
+    ```bash
+    rm -rf ~/.config/.whecho/
+    whecho --init
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    ```bash
+    rmdir /s %APPDATA%\.whecho
+    whecho --init
+    ```
+  </Tab>
+</Tabs>
+
+## Best Practices
+
+<Tip>
+  Keep webhook URLs secure. Do not commit config files to version control.
+</Tip>
+
+<Tip>
+  Use meaningful machine names in multi-server environments to easily identify message sources.
+</Tip>
+
+<Tip>
+  Set up different webhook URLs for different environments (dev, staging, production).
+</Tip>
+
+<Tip>
+  Regularly verify your webhook URLs are still active, especially if you receive 404 errors.
+</Tip>

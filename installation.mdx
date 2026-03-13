@@ -1,0 +1,213 @@
+---
+title: Installation
+description: Install whecho on Linux, macOS, or Windows
+---
+
+## System Requirements
+
+Before installing whecho, ensure you have:
+
+- **Python 3.6 or higher**
+- **pip** (Python package installer)
+- Internet connection for downloading packages
+
+## Installation via pip
+
+The recommended way to install whecho is using pip:
+
+<CodeGroup>
+```bash pip
+pip install whecho
+```
+
+```bash pip3
+pip3 install whecho
+```
+
+```bash Python -m pip
+python -m pip install whecho
+```
+
+```bash Python3 -m pip
+python3 -m pip install whecho
+```
+</CodeGroup>
+
+<Info>
+  Use `pip3` or `python3 -m pip` if you have multiple Python versions installed.
+</Info>
+
+## Dependencies
+
+whecho automatically installs the following dependencies:
+
+- **requests** (≥2.25.1) - For HTTP webhook requests
+- **toml** (≥0.6.0) - For configuration file management
+- **importlib-metadata** (≥1.0) - For Python < 3.8 compatibility
+
+## Platform-Specific Notes
+
+### Linux
+
+whecho stores its configuration at:
+```
+~/.config/.whecho/config.toml
+```
+
+No additional setup required. Works on all major distributions.
+
+### macOS (Darwin)
+
+whecho stores its configuration at:
+```
+~/Library/Application Support/.whecho/config.toml
+```
+
+If you encounter permission issues, you may need to use:
+```bash
+pip install --user whecho
+```
+
+### Windows
+
+whecho stores its configuration at:
+```
+%APPDATA%\.whecho\config.toml
+```
+
+For Windows 10+, ensure Python is added to your PATH during installation.
+
+<Warning>
+  Windows users may need to restart their terminal after installation for the `whecho` command to be recognized.
+</Warning>
+
+## Verify Installation
+
+After installation, verify that whecho is correctly installed:
+
+<Steps>
+  <Step title="Check version">
+    Run the version command to confirm installation:
+    ```bash
+    whecho --version
+    ```
+    
+    This should display the installed version (e.g., `0.0.6`).
+  </Step>
+  
+  <Step title="View help">
+    Display available options:
+    ```bash
+    whecho --help
+    ```
+    
+    You should see output similar to:
+    ```
+    usage: whecho [-h] [--version] [-m MSG] [--init] [-u URL] [-d] [MSG [MSG ...]]
+
+    Linux echo with webhooks! ⚓
+
+    positional arguments:
+      MSG                The message to echo.
+
+    optional arguments:
+      -h, --help         show this help message and exit
+      --version          Prints the version of whecho and exits.
+      -m MSG, --msg MSG  The message to echo (same as 1st positional argument).
+      --init             Initializes whecho. Also used to change current config.
+      -u URL, --url URL  The webhook URL to send the message to.
+      -d, --debug        Whether to print debugging information.
+    ```
+  </Step>
+</Steps>
+
+## Upgrading whecho
+
+To upgrade to the latest version:
+
+```bash
+pip install --upgrade whecho
+```
+
+## Troubleshooting
+
+### "Command not found" error
+
+If you get a `whecho: command not found` error after installation:
+
+1. **Check if the installation directory is in your PATH:**
+   ```bash
+   pip show whecho
+   ```
+   Note the "Location" path.
+
+2. **Add pip's bin directory to PATH:**
+   
+   For Linux/macOS, add to `~/.bashrc` or `~/.zshrc`:
+   ```bash
+   export PATH="$HOME/.local/bin:$PATH"
+   ```
+   
+   For Windows, add the Scripts directory to your system PATH through Environment Variables.
+
+3. **Restart your terminal** and try again.
+
+### Permission denied errors
+
+If you encounter permission errors during installation:
+
+```bash
+pip install --user whecho
+```
+
+This installs whecho in your user directory instead of system-wide.
+
+### Python version issues
+
+Ensure you're using Python 3.6+:
+
+```bash
+python --version
+```
+
+If your default Python is 2.x, use `python3` explicitly:
+
+```bash
+python3 -m pip install whecho
+```
+
+### UTF-8 encoding issues
+
+whecho includes emoji in its description (⚓). If your terminal doesn't support UTF-8:
+
+- The emoji will be automatically removed from the help text
+- All functionality will work normally
+- Consider upgrading your terminal emulator for better Unicode support
+
+### Import errors with importlib-metadata
+
+For Python < 3.8, if you see import errors:
+
+```bash
+pip install importlib-metadata>=1.0
+```
+
+## Uninstalling
+
+To remove whecho:
+
+```bash
+pip uninstall whecho
+```
+
+<Note>
+  This removes the whecho package but preserves your configuration file. To completely remove all traces, also delete the config directory for your platform (see Platform-Specific Notes above).
+</Note>
+
+## Next Steps
+
+Now that whecho is installed, learn how to use it:
+
+<Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+  Configure whecho and send your first message in under 2 minutes
+</Card>

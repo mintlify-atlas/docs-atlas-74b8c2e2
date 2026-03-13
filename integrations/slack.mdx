@@ -1,0 +1,109 @@
+---
+title: 'Slack Integration'
+description: 'Send webhook notifications to Slack channels'
+---
+
+## Overview
+
+Whecho automatically detects Slack webhooks and formats messages appropriately. Slack webhooks are identified by URLs containing `slack.com`.
+
+## Setup
+
+<Steps>
+  <Step title="Create a Slack Incoming Webhook">
+    1. Go to your Slack workspace's [App Directory](https://slack.com/apps)
+    2. Search for "Incoming WebHooks" and select it
+    3. Click **Add to Slack**
+    4. Choose the channel where you want to post messages
+    5. Click **Add Incoming WebHooks integration**
+    6. Copy the webhook URL provided
+    
+    <Info>
+      For detailed instructions, see the [Slack Incoming Webhooks Documentation](https://api.slack.com/messaging/webhooks)
+    </Info>
+  </Step>
+  
+  <Step title="Configure Whecho">
+    Set your Slack webhook URL as the default:
+    
+    ```bash
+    whecho --init
+    ```
+    
+    Or use it directly in commands:
+    
+    ```bash
+    whecho "Your message" --url https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+    ```
+  </Step>
+</Steps>
+
+## Message Format
+
+Slack messages sent by whecho use the following JSON payload structure:
+
+```json
+{
+  "text": "Your message here"
+}
+```
+
+### Payload Fields
+
+- **text**: The message content you provide to whecho
+
+<Note>
+  Unlike Discord, the Slack integration uses a simple text-only format. The username is determined by the webhook configuration in Slack itself.
+</Note>
+
+## Example Usage
+
+<CodeGroup>
+```bash Basic Message
+whecho "Deployment completed successfully!"
+```
+
+```bash Pipeline Notification
+whecho "CI pipeline passed all tests"
+```
+
+```bash With Custom URL
+whecho "Alert message" --url https://hooks.slack.com/services/T00/B00/XX
+```
+</CodeGroup>
+
+## How It Appears in Slack
+
+Messages appear in your Slack channel with:
+- The bot name and avatar as configured in your webhook settings
+- The message content displayed with Slack's formatting
+- An "APP" label next to the bot name
+
+<Info>
+  Slack supports [mrkdwn formatting](https://api.slack.com/reference/surfaces/formatting) in the message text, allowing you to use bold, italics, links, and more.
+</Info>
+
+## Channel Configuration Tips
+
+<Accordion title="Choose the right channel">
+  Select a dedicated channel for automated notifications to keep your main channels clean. Consider creating channels like `#notifications`, `#builds`, or `#alerts`.
+</Accordion>
+
+<Accordion title="Customize the webhook appearance">
+  In the Slack webhook configuration, you can customize:
+  - Bot name
+  - Bot icon (emoji or custom image)
+  - Default channel (can be overridden)
+</Accordion>
+
+<Accordion title="Use thread replies for related messages">
+  While whecho sends standalone messages, you can manually reply to them in threads to keep conversations organized.
+</Accordion>
+
+<Accordion title="Set up multiple webhooks">
+  Create different webhooks for different purposes (production alerts, staging deploys, etc.) to easily distinguish notification types.
+</Accordion>
+
+<Accordion title="Monitor workspace limits">
+  Free Slack workspaces have message history limits. Consider this when setting up frequent notifications.
+</Accordion>

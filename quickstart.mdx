@@ -1,80 +1,294 @@
 ---
 title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+description: "Send your first webhook notification in under 5 minutes"
 ---
 
-## Get started in three steps
-
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Get up and running with whecho quickly by following this step-by-step guide.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Before starting, make sure you have [installed whecho](/installation) on your system.
 </Note>
+
+## Prerequisites
+
+- Python 3.6 or higher installed
+- A webhook URL from Discord, Slack, Webex, Teams, or another webhook service
+
+## Step-by-Step Guide
+
+<Steps>
+  <Step title="Obtain a Webhook URL">
+    First, you'll need to get a webhook URL from your preferred platform. Choose one below:
+
+    <Tabs>
+      <Tab title="Discord">
+        1. Open your Discord server settings
+        2. Go to **Integrations** → **Webhooks**
+        3. Click **New Webhook**
+        4. Give it a name and choose a channel
+        5. Click **Copy Webhook URL**
+
+        Your webhook URL will look like:
+        ```
+        https://discord.com/api/webhooks/123456789/abcdefghijk...
+        ```
+
+        [Learn more about Discord webhooks →](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+      </Tab>
+
+      <Tab title="Slack">
+        1. Go to your Slack workspace's [App Directory](https://api.slack.com/messaging/webhooks)
+        2. Search for **Incoming Webhooks** and add it
+        3. Choose a channel to post to
+        4. Click **Add Incoming WebHooks Integration**
+        5. Copy the **Webhook URL**
+
+        Your webhook URL will look like:
+        ```
+        https://hooks.slack.com/services/T00000000/B00000000/XXXX...
+        ```
+
+        [Learn more about Slack webhooks →](https://api.slack.com/messaging/webhooks)
+      </Tab>
+
+      <Tab title="Webex">
+        1. Go to the [Webex App Hub](https://apphub.webex.com/applications/incoming-webhooks-cisco-systems-38054-23307-75252)
+        2. Click **Connect** to add Incoming Webhooks
+        3. Select a space to send messages to
+        4. Give your webhook a name
+        5. Copy the **Webhook URL**
+
+        Your webhook URL will look like:
+        ```
+        https://webexapis.com/v1/webhooks/incoming/...
+        ```
+
+        [Learn more about Webex webhooks →](https://apphub.webex.com/applications/incoming-webhooks-cisco-systems-38054-23307-75252)
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Initialize whecho Configuration">
+    Run the initialization command to set up your default webhook URL:
+
+    ```bash
+    whecho --init
+    ```
+
+    You'll see an interactive prompt. Here's an example session:
+
+    ```bash
+    Current config:
+    [1] default_url: None
+    [2] user: craut
+    [3] machine: craut-spectre
+
+    Please enter the number/name of the config option you would like to modify (empty or Q to exit): 1
+    Please enter the new value for default_url: https://discord.com/api/webhooks/YOUR_WEBHOOK_URL
+    Successfully modified default_url to https://discord.com/api/webhooks/YOUR_WEBHOOK_URL!
+    Current config:
+    [1] default_url: https://discord.com/api/webhooks/YOUR_WEBHOOK_URL
+    [2] user: craut
+    [3] machine: craut-spectre
+
+    Please enter the number/name of the config option you would like to modify (empty or Q to exit): q
+    Successfully initialized whecho!
+    ```
+
+    <Info>
+    The `user` and `machine` fields are automatically detected from your system. You can modify them if you want to customize how messages appear.
+    </Info>
+  </Step>
+
+  <Step title="Send Your First Message">
+    Now you're ready to send your first notification! Simply run:
+
+    ```bash
+    whecho "Hello from the command line!"
+    ```
+
+    Your message should appear in your configured channel within seconds.
+
+    <Note>
+    The message format varies by platform. For Discord, it will show as `user@machine: message`. For Slack and others, it will show just the message text.
+    </Note>
+  </Step>
+</Steps>
+
+## Try More Examples
+
+### Simple Message
+
+```bash
+whecho "Build completed successfully ✅"
+```
+
+### Multi-word Messages
+
+```bash
+whecho This is a message without quotes
+```
+
+### Message with Special Characters
+
+```bash
+whecho "Status: OK | Time: $(date)"
+```
+
+### Chain with Commands
+
+Run a command and notify when it completes:
+
+```bash
+./train_model.sh && whecho "Model training finished!"
+```
+
+Or notify regardless of success/failure:
+
+```bash
+./backup.sh; whecho "Backup script completed"
+```
+
+### Conditional Notifications
+
+```bash
+if grep -q "ERROR" logfile.txt; then
+  whecho "⚠️ Errors found in logfile!"
+fi
+```
+
+## Using the Python API
+
+You can also send notifications from within your Python scripts:
+
+```python
+from whecho.whecho import whecho_simple
+
+# Send a notification
+whecho_simple("Script execution completed!")
+
+# With a custom URL (overrides default)
+whecho_simple(
+    "Important alert!", 
+    url="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+)
+
+# With debug output
+whecho_simple("Debug message", debug=True)
+```
+
+<Tip>
+The Python API is perfect for:
+- Long-running data processing jobs
+- Machine learning training scripts
+- ETL pipelines
+- Automated report generation
+</Tip>
+
+## Advanced Usage
+
+### Override Default URL
+
+Send a message to a different webhook without changing your config:
+
+```bash
+whecho -u https://hooks.slack.com/services/YOUR/URL "Message to Slack"
+```
+
+### Debug Mode
+
+See what's being sent and the HTTP response:
+
+```bash
+whecho -d "Debug message"
+```
+
+This outputs:
+- The config being used
+- The message content
+- The webhook URL
+- The JSON payload
+- The HTTP response
+
+### Using the `-m` Flag
+
+Alternative syntax for specifying the message:
+
+```bash
+whecho -m "Your message here"
+```
+
+This is equivalent to the positional argument but can be useful in scripts.
+
+## Real-World Examples
+
+### Data Science Workflow
+
+```bash
+# Notify when Jupyter notebook completes
+jupyter nbconvert --execute analysis.ipynb && whecho "Analysis notebook completed"
+
+# Notify when model training finishes
+python train.py && whecho "Model training complete - check results.csv"
+```
+
+### System Administration
+
+```bash
+# Backup notification
+tar -czf backup.tar.gz /important/data && whecho "Backup completed successfully"
+
+# Disk space monitoring
+df -h | grep '9[0-9]%' && whecho "⚠️ Disk space critical!"
+```
+
+### CI/CD Integration
+
+```bash
+# In your CI pipeline
+npm run build && npm test && whecho "✅ Build and tests passed"
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Message not appearing">
+    - Verify your webhook URL is correct with `whecho -d "test"`
+    - Check that the webhook hasn't been deleted in your platform
+    - Ensure you have internet connectivity
+    - Try running with `--debug` flag to see the HTTP response
+  </Accordion>
+
+  <Accordion title="Config not found error">
+    If you see `whecho is not initialized with a default url`, run:
+    ```bash
+    whecho --init
+    ```
+    This creates the configuration file with your webhook URL.
+  </Accordion>
+
+  <Accordion title="UTF-8 encoding issues">
+    If you see encoding errors with emojis:
+    ```bash
+    export PYTHONIOENCODING=utf-8
+    whecho "Message with emoji 🎉"
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="CLI Commands" icon="terminal" href="/usage/cli-commands">
+    Explore all command-line options and flags
+  </Card>
+  <Card title="Python API" icon="code" href="/usage/python-api">
+    Learn the full Python API reference
+  </Card>
+  <Card title="Platform Setup" icon="plug" href="/integrations/discord">
+    Detailed guides for each webhook platform
+  </Card>
+  <Card title="Configuration" icon="gear" href="/usage/configuration">
+    Customize your whecho configuration
+  </Card>
+</CardGroup>

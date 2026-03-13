@@ -1,0 +1,118 @@
+---
+title: Introduction
+description: Get notified when your long-running scripts and jobs complete
+---
+
+## What is whecho?
+
+whecho is a command-line tool that brings webhook notifications to your terminal. Think of it as "Linux echo with webhooks" - it sends messages to Discord, Slack, Webex, and other webhook-enabled platforms directly from your command line or Python scripts.
+
+Instead of constantly checking whether your long-running jobs have finished, let whecho notify you when they're done.
+
+## Why whecho?
+
+Have you ever:
+- Started a long-running script and then forgot to check if it finished?
+- Wished you could get notified when your CI/CD pipeline completes?
+- Wanted a simple way to monitor script progress without checking logs constantly?
+
+whecho solves these problems with a single command:
+
+```bash
+whecho "Training complete! Accuracy: 94.5%"
+```
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Multi-Platform Support" icon="webhook">
+    Works with Discord, Slack, Webex, Microsoft Teams, and any generic webhook
+  </Card>
+  <Card title="Cross-Platform" icon="desktop">
+    Runs on Linux, macOS, and Windows with Python 3.6+
+  </Card>
+  <Card title="Simple CLI" icon="terminal">
+    Easy-to-use command-line interface with minimal configuration
+  </Card>
+  <Card title="Python API" icon="python">
+    Import and use directly in your Python scripts
+  </Card>
+</CardGroup>
+
+## Common Use Cases
+
+### Long-Running Scripts
+
+Get notified when your data processing, model training, or batch jobs complete:
+
+```bash
+./train_model.sh && whecho "Model training finished!"
+```
+
+### CI/CD Pipelines
+
+Integrate whecho into your deployment scripts to get notifications:
+
+```bash
+docker build -t myapp . && whecho "Docker build successful!"
+```
+
+### System Monitoring
+
+Send alerts when specific conditions are met:
+
+```bash
+if [ $(df -h / | tail -1 | awk '{print $5}' | sed 's/%//') -gt 90 ]; then
+  whecho "Warning: Disk usage above 90%!"
+fi
+```
+
+### Scheduled Tasks
+
+Notify yourself when cron jobs complete:
+
+```bash
+0 2 * * * /home/user/backup.sh && whecho "Backup completed successfully"
+```
+
+## How It Works
+
+whecho formats your message and sends it to a configured webhook URL. The message includes:
+
+- Your username
+- Your machine hostname
+- Your custom message
+
+For Discord webhooks, messages appear as:
+
+```
+user@machine-name
+Your message here
+```
+
+<Info>
+  whecho automatically detects the webhook platform (Discord, Slack, Webex, Teams) and formats the message accordingly.
+</Info>
+
+## Platform Support
+
+| Platform | Supported | Message Format |
+|----------|-----------|----------------|
+| Discord | ✓ | Username + content |
+| Slack | ✓ | Plain text |
+| Webex | ✓ | Markdown |
+| Microsoft Teams | ✓ | Plain text |
+| Generic webhooks | ✓ | JSON with text field |
+
+## Next Steps
+
+Ready to get started?
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install whecho using pip
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Send your first webhook message in 2 minutes
+  </Card>
+</CardGroup>

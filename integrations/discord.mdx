@@ -1,0 +1,99 @@
+---
+title: 'Discord Integration'
+description: 'Send webhook notifications to Discord channels'
+---
+
+## Overview
+
+Whecho automatically detects Discord webhooks and formats messages appropriately. Discord webhooks are identified by URLs containing `discord.com` or `discordapp.com`.
+
+## Setup
+
+<Steps>
+  <Step title="Create a Discord Webhook">
+    1. Open your Discord server and navigate to the channel where you want to receive notifications
+    2. Click the gear icon (Edit Channel) next to the channel name
+    3. Select **Integrations** from the left sidebar
+    4. Click **Create Webhook** or **View Webhooks**
+    5. Click **New Webhook**, give it a name, and copy the webhook URL
+    
+    <Info>
+      For detailed instructions, see the [Discord Webhook Documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+    </Info>
+  </Step>
+  
+  <Step title="Configure Whecho">
+    Set your Discord webhook URL as the default:
+    
+    ```bash
+    whecho --init
+    ```
+    
+    Or use it directly in commands:
+    
+    ```bash
+    whecho "Your message" --url https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_TOKEN
+    ```
+  </Step>
+</Steps>
+
+## Message Format
+
+Discord messages sent by whecho use the following JSON payload structure:
+
+```json
+{
+  "username": "user@machine",
+  "content": "Your message here"
+}
+```
+
+### Payload Fields
+
+- **username**: Automatically set to `{user}@{machine}` format based on your system configuration
+- **content**: The message text you provide to whecho
+
+## Example Usage
+
+<CodeGroup>
+```bash Basic Message
+whecho "Build completed successfully!"
+```
+
+```bash Command Notification
+whecho "Deployment finished" && make deploy
+```
+
+```bash With Custom URL
+whecho "Test alert" --url https://discord.com/api/webhooks/123456/abcdef
+```
+</CodeGroup>
+
+## How It Appears in Discord
+
+Messages appear in your Discord channel with:
+- The bot name showing as `username@hostname` (e.g., `john@laptop`)
+- The message content displayed as plain text
+- A "BOT" tag next to the username
+
+<Note>
+  Discord webhooks support rich formatting using Discord's markdown syntax in the message content itself.
+</Note>
+
+## Tips and Best Practices
+
+<Accordion title="Create separate webhooks for different notification types">
+  Use different webhooks (or channels) for different types of notifications (builds, deployments, alerts) to keep them organized.
+</Accordion>
+
+<Accordion title="Customize the webhook avatar">
+  In Discord's webhook settings, you can set a custom avatar that will appear alongside messages from whecho.
+</Accordion>
+
+<Accordion title="Use channel permissions">
+  Set appropriate permissions on the Discord channel to control who can see webhook notifications.
+</Accordion>
+
+<Accordion title="Monitor rate limits">
+  Discord has rate limits on webhooks. Avoid sending messages too frequently to prevent being rate-limited.
+</Accordion>

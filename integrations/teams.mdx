@@ -1,0 +1,161 @@
+---
+title: 'Microsoft Teams Integration'
+description: 'Send webhook notifications to Microsoft Teams channels'
+---
+
+## Overview
+
+Whecho automatically detects Microsoft Teams webhooks and formats messages appropriately. Teams webhooks are identified by URLs containing `webhook.office.com`.
+
+## Setup
+
+<Steps>
+  <Step title="Create a Teams Incoming Webhook">
+    1. Open Microsoft Teams and navigate to the channel where you want to receive notifications
+    2. Click the **...** (More options) next to the channel name
+    3. Select **Connectors** or **Workflows** (depending on your Teams version)
+    4. Search for "Incoming Webhook"
+    5. Click **Configure** or **Add**
+    6. Provide a name for your webhook and optionally upload an image
+    7. Click **Create** and copy the webhook URL
+    
+    <Info>
+      For detailed instructions, see the [Microsoft Teams Incoming Webhooks Documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)
+    </Info>
+  </Step>
+  
+  <Step title="Configure Whecho">
+    Set your Teams webhook URL as the default:
+    
+    ```bash
+    whecho --init
+    ```
+    
+    Or use it directly in commands:
+    
+    ```bash
+    whecho "Your message" --url https://your-domain.webhook.office.com/webhookb2/YOUR_WEBHOOK_PATH
+    ```
+  </Step>
+</Steps>
+
+## Message Format
+
+Teams messages sent by whecho use the following JSON payload structure:
+
+```json
+{
+  "text": "Your message here"
+}
+```
+
+### Payload Fields
+
+- **text**: The message content you provide to whecho
+
+<Note>
+  The Teams integration uses a simple text-based format. The webhook name and icon are determined by the configuration you set when creating the webhook in Teams.
+</Note>
+
+## Example Usage
+
+<CodeGroup>
+```bash Basic Message
+whecho "Build completed successfully!"
+```
+
+```bash Deployment Notification
+whecho "Production deployment finished at $(date)"
+```
+
+```bash Pipeline Alert
+whecho "CI pipeline failed on branch: main"
+```
+
+```bash With Custom URL
+whecho "Test notification" --url https://your-domain.webhook.office.com/webhookb2/YOUR_PATH
+```
+</CodeGroup>
+
+## How It Appears in Teams
+
+Messages appear in your Teams channel as:
+- A message card with the webhook name and icon you configured
+- The message text displayed in the card body
+- A subtle indicator that it's from a webhook/connector
+
+<Info>
+  While whecho sends simple text messages, Teams webhooks also support rich [Adaptive Cards](https://adaptivecards.io/) for more complex formatting. This requires custom payload construction beyond whecho's scope.
+</Info>
+
+## Troubleshooting
+
+<Accordion title="Webhook URL not working">
+  **Problem**: Messages aren't appearing in Teams
+  
+  **Solutions**:
+  - Verify the webhook URL is complete and hasn't been truncated
+  - Check that the webhook hasn't been removed from the Teams channel
+  - Ensure the webhook URL starts with `https://` and contains `webhook.office.com`
+  - Test the webhook directly with curl to isolate the issue:
+    ```bash
+    curl -X POST -H "Content-Type: application/json" -d '{"text":"test"}' YOUR_WEBHOOK_URL
+    ```
+</Accordion>
+
+<Accordion title="Messages not formatted correctly">
+  **Problem**: Message text appears broken or improperly formatted
+  
+  **Solutions**:
+  - Escape special characters in your message (quotes, backslashes, etc.)
+  - Avoid using markdown syntax—Teams text field doesn't render markdown
+  - Keep messages reasonably short to avoid truncation
+</Accordion>
+
+<Accordion title="Webhook was removed or disabled">
+  **Problem**: Webhook stopped working suddenly
+  
+  **Solutions**:
+  - Check if someone removed the webhook from the Teams channel
+  - Verify the webhook is still listed in the channel's connectors/workflows
+  - Create a new webhook if the old one was deleted
+  - Update your whecho configuration with the new webhook URL
+</Accordion>
+
+<Accordion title="Rate limiting issues">
+  **Problem**: Some messages aren't being delivered
+  
+  **Solutions**:
+  - Microsoft Teams has rate limits on webhook calls
+  - Avoid sending messages in rapid succession
+  - Implement delays between messages if sending multiple notifications
+  - Consider batching multiple updates into a single message
+</Accordion>
+
+<Accordion title="Authentication or permission errors">
+  **Problem**: Receiving 401 or 403 errors
+  
+  **Solutions**:
+  - The webhook URL contains the authentication token—ensure it's complete
+  - Check that your organization's security policies allow incoming webhooks
+  - Verify you have permission to add connectors to the channel
+  - Contact your Teams administrator if webhooks are disabled organization-wide
+</Accordion>
+
+## Tips and Best Practices
+
+<Accordion title="Use clear webhook names">
+  Give your webhooks descriptive names like "Build Notifications" or "Production Alerts" so team members understand the source of messages.
+</Accordion>
+
+<Accordion title="Create dedicated channels">
+  Set up specific channels for automated notifications to keep your main team channels focused on conversations.
+</Accordion>
+
+<Accordion title="Monitor notification volume">
+  Too many notifications can lead to alert fatigue. Be selective about what triggers a Teams message.
+</Accordion>
+
+<Accordion title="Document your webhooks">
+  Keep a record of which webhooks are used for what purposes, especially in team environments with multiple automation setups.
+</Accordion>

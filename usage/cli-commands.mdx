@@ -1,0 +1,239 @@
+---
+title: CLI Commands
+description: Complete reference for whecho command-line interface
+---
+
+## Overview
+
+whecho provides a simple command-line interface for sending messages to webhooks. The basic syntax is:
+
+```bash
+whecho [OPTIONS] [MSG]
+```
+
+## Basic Usage
+
+Send a message using your configured default webhook:
+
+```bash
+whecho "hello there"
+```
+
+Send a message with positional arguments (automatically joined with spaces):
+
+```bash
+whecho Job completed successfully
+# Sends: "Job completed successfully"
+```
+
+## Command-Line Options
+
+<ParamField path="--version" type="flag">
+  Prints the version of whecho and exits.
+  
+  ```bash
+  whecho --version
+  ```
+</ParamField>
+
+<ParamField path="-m, --msg" type="string">
+  The message to echo. Alternative to using positional arguments.
+  
+  ```bash
+  whecho -m "Build completed"
+  whecho --msg "Test suite passed"
+  ```
+  
+  <Note>
+    If both `-m` and positional arguments are provided, `-m` takes precedence.
+  </Note>
+</ParamField>
+
+<ParamField path="--init" type="flag">
+  Initializes whecho configuration. Also used to modify existing config.
+  
+  ```bash
+  whecho --init
+  ```
+  
+  See [Configuration](/usage/configuration) for detailed setup instructions.
+</ParamField>
+
+<ParamField path="-u, --url" type="string">
+  The webhook URL to send the message to. Overrides the default URL from config.
+  
+  ```bash
+  whecho -u "https://discord.com/api/webhooks/..." -m "Custom webhook message"
+  ```
+</ParamField>
+
+<ParamField path="-d, --debug" type="flag">
+  Enables debug mode, printing detailed information about the request.
+  
+  ```bash
+  whecho -d -m "Debug test message"
+  ```
+  
+  Debug output includes:
+  - Parsed arguments
+  - Loaded configuration
+  - Processed message
+  - Request data payload
+  - HTTP response object
+</ParamField>
+
+<ParamField path="MSG" type="string">
+  Positional argument(s) for the message to send. Multiple arguments are joined with spaces.
+  
+  ```bash
+  whecho This is a test message
+  # Sends: "This is a test message"
+  ```
+</ParamField>
+
+## Common Usage Patterns
+
+### Piping Output
+
+Send command output as a webhook message:
+
+```bash
+echo "Build completed at $(date)" | xargs whecho -m
+```
+
+### Chaining Commands
+
+Notify when a long-running job completes:
+
+```bash
+make build && whecho "Build succeeded" || whecho "Build failed"
+```
+
+```bash
+pytest tests/ && whecho "All tests passed ✓"
+```
+
+### Multi-line Messages
+
+Send multi-line messages using quotes:
+
+```bash
+whecho "Build Report:
+- Status: Success
+- Duration: 5m 23s
+- Tests: 142 passed"
+```
+
+### Using with Different Webhooks
+
+Send to different webhooks without changing config:
+
+```bash
+whecho -u "$DISCORD_WEBHOOK" -m "Sent to Discord"
+whecho -u "$SLACK_WEBHOOK" -m "Sent to Slack"
+```
+
+## Exit Codes
+
+whecho uses standard Unix exit codes:
+
+<CodeGroup>
+```bash Exit 0 (Success)
+whecho "Test message"
+echo $?  # 0
+```
+
+```bash Exit 1 (No Config)
+# When whecho is not initialized and no URL provided
+whecho "Test message"
+# Output: whecho is not initialized with a default url. Please run whecho --init to initialize whecho.
+echo $?  # 1
+```
+
+```bash Exit 1 (No Message)
+# When no message is provided
+whecho
+# Output: No message passed. Try whecho --help for more info.
+echo $?  # 1
+```
+</CodeGroup>
+
+## Debug Output Example
+
+When using the `--debug` flag, whecho provides detailed output:
+
+```bash
+$ whecho -d -m "Test message"
+```
+
+```plaintext
+Arguments passed: Namespace(version=False, msg='Test message', message=[], init=False, url=None, debug=True)
+Config pulled from : /home/user/.config/.whecho/config.toml
+Config: {'default_url': 'https://discord.com/api/webhooks/...', 'version': '0.4.0', 'user': 'craut', 'os': 'Linux', 'machine': 'workstation'}
+Message: Test message
+Detected discord.com in URL
+Data: {'username': 'craut@workstation', 'content': 'Test message'}
+Response: <Response [204]>
+```
+
+## Error Handling
+
+### Missing Configuration
+
+If whecho is not initialized:
+
+```bash
+$ whecho "Test"
+whecho is not initialized with a default url. Please run whecho --init to initialize whecho.
+```
+
+### HTTP Errors
+
+If the webhook request fails, whecho prints the HTTP error:
+
+```bash
+404 Client Error: Not Found for url: https://discord.com/api/webhooks/invalid
+```
+
+<Warning>
+  When webhook URLs are invalid or expired, you'll receive HTTP 404 errors. Verify your webhook URL is correct and still active.
+</Warning>
+
+## Help Text
+
+Access built-in help anytime:
+
+```bash
+whecho --help
+```
+
+```plaintext
+usage: whecho [-h] [--version] [-m MSG] [--init] [-u URL] [-d] [MSG [MSG ...]]
+
+Linux echo with webhooks! ⚓
+
+positional arguments:
+  MSG                The message to echo.
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --version          Prints the version of whecho and exits.
+  -m MSG, --msg MSG  The message to echo (same as 1st positional argument).
+  --init             Initializes whecho. Also used to change current config.
+  -u URL, --url URL  The webhook URL to send the message to.
+  -d, --debug        Whether to print debugging information.
+```
+
+## Tips
+
+<Tip>
+  Use `whecho -d` when testing to see exactly what data is being sent to your webhook.
+</Tip>
+
+<Tip>
+  The `-u` flag is useful for testing different webhooks without modifying your configuration.
+</Tip>
+
+<Tip>
+  For automated notifications, combine whecho with shell conditionals (`&&`, `||`) to notify on success or failure.
+</Tip>

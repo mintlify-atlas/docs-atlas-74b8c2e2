@@ -1,97 +1,133 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "whecho"
+description: "Linux echo with webhooks - get notified when your scripts finish"
 ---
 
-## Setting up
+<div className="flex flex-col items-center justify-center py-12">
+  <h1 className="text-5xl font-bold text-center mb-6" style={{color: '#22bd7a'}}>
+    Linux echo but with webhooks ⚓
+  </h1>
+  <p className="text-xl text-center max-w-2xl mb-8 text-gray-600 dark:text-gray-300">
+    Don't guess when a job is finished! Have it message you on Discord, Slack, Webex, or Teams.
+  </p>
+  
+  <div className="flex gap-4 mb-12">
+    <a 
+      href="/quickstart" 
+      className="px-6 py-3 rounded font-semibold text-white"
+      style={{backgroundColor: '#22bd7a'}}
+    >
+      Get Started
+    </a>
+    <a 
+      href="https://github.com/cvraut/whecho" 
+      className="px-6 py-3 rounded font-semibold border-2"
+      style={{borderColor: '#22bd7a', color: '#22bd7a'}}
+    >
+      View on GitHub
+    </a>
+  </div>
+</div>
 
-Get your documentation site up and running in minutes.
+## Key Features
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Command Line Tool" icon="terminal" href="/usage/cli-commands">
+    Send webhook notifications directly from your terminal
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Python API" icon="code" href="/usage/python-api">
+    Integrate webhook notifications into your Python scripts
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Multiple Platforms" icon="plug" href="/integrations/discord">
+    Support for Discord, Slack, Webex, Teams, and generic webhooks
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Cross-Platform" icon="laptop" href="/installation">
+    Works on Linux, Windows, and macOS
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Quick Example
 
-Everything you need to create world-class documentation.
+Send a notification when your long-running job completes:
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+```bash
+# Run your job and notify when done
+./train_model.sh && whecho "Model training complete! 🎉"
+```
 
-## Need inspiration?
+Or use it from Python:
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+```python
+from whecho.whecho import whecho_simple
+
+# Send notification from your script
+whecho_simple("Data processing finished!")
+```
+
+## Get Started in Minutes
+
+<Steps>
+  <Step title="Install whecho">
+    Install via pip in seconds
+    
+    ```bash
+    pip install whecho
+    ```
+  </Step>
+  
+  <Step title="Configure your webhook">
+    Set up your webhook URL once
+    
+    ```bash
+    whecho --init
+    ```
+  </Step>
+  
+  <Step title="Send your first message">
+    Start receiving notifications
+    
+    ```bash
+    whecho "Hello from the command line!"
+    ```
+  </Step>
+</Steps>
+
+## Use Cases
+
+<CardGroup cols={3}>
+  <Card title="Long Scripts" icon="clock">
+    Get notified when training jobs, data processing, or backups finish
+  </Card>
+  <Card title="CI/CD Pipelines" icon="code-branch">
+    Send build status notifications to your team channels
+  </Card>
+  <Card title="Server Monitoring" icon="server">
+    Alert your team when critical events occur on your servers
+  </Card>
+  <Card title="Cron Jobs" icon="calendar">
+    Track scheduled task completion without checking logs
+  </Card>
+  <Card title="Development" icon="wrench">
+    Debug and monitor script execution in real-time
+  </Card>
+  <Card title="Team Updates" icon="users">
+    Keep everyone in the loop with automated notifications
+  </Card>
+</CardGroup>
+
+## Ready to Get Started?
+
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Install whecho on your system
+  </Card>
+  <Card title="Quickstart Tutorial" icon="rocket" href="/quickstart">
+    Send your first webhook notification
+  </Card>
+  <Card title="CLI Reference" icon="terminal" href="/usage/cli-commands">
+    Explore all command-line options
+  </Card>
+  <Card title="Platform Setup" icon="plug" href="/integrations/discord">
+    Configure Discord, Slack, Webex, or Teams
+  </Card>
+</CardGroup>

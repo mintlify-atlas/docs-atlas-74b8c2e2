@@ -1,0 +1,388 @@
+---
+title: Python API
+description: Use whecho programmatically in your Python scripts
+---
+
+## Overview
+
+whecho provides a simple Python API for sending webhook messages from your Python code. This is useful for integrating notifications into your Python scripts, applications, or automation workflows.
+
+## Installation
+
+First, install whecho:
+
+```bash
+pip install whecho
+```
+
+## Basic Usage
+
+Import and use the `whecho_simple()` function:
+
+```python
+from whecho.whecho import whecho_simple
+
+whecho_simple("I'm inside python 🐍")
+```
+
+## Function Signature
+
+### whecho_simple()
+
+```python
+def whecho_simple(
+    msg: str,
+    url: str = "",
+    debug: bool = False
+) -> Optional[requests.models.Response]
+```
+
+Makes a POST request to the given webhook URL using a simple message format.
+
+#### Parameters
+
+<ParamField path="msg" type="str" required>
+  The message to be posted to the webhook.
+  
+  ```python
+  whecho_simple("Build completed successfully")
+  ```
+</ParamField>
+
+<ParamField path="url" type="str" default="">
+  The webhook URL to send the message to. If not provided or empty, the default URL from config will be loaded.
+  
+  ```python
+  whecho_simple(
+      "Custom webhook message",
+      url="https://discord.com/api/webhooks/..."
+  )
+  ```
+  
+  <Note>
+    If no URL is provided and no default is configured, a `ValueError` will be raised.
+  </Note>
+</ParamField>
+
+<ParamField path="debug" type="bool" default="False">
+  Whether to print debugging information to stdout.
+  
+  ```python
+  response = whecho_simple("Debug test", debug=True)
+  print(response.status_code)  # 204
+  ```
+  
+  When `True`, returns the `requests.Response` object. When `False`, returns `None`.
+</ParamField>
+
+#### Returns
+
+- **When `debug=False`**: Returns `None`
+- **When `debug=True`**: Returns `requests.models.Response` object containing:
+  - `status_code`: HTTP status code (e.g., 204, 200)
+  - `text`: Response body text
+  - `headers`: Response headers
+  - Other standard `requests.Response` attributes
+
+#### Raises
+
+<Warning>
+  **ValueError**: Raised when no URL is provided and no default URL is configured.
+  
+  ```python
+  # This will raise ValueError if config not initialized
+  whecho_simple("Test", url=None)
+  # ValueError: No URL passed. Did you run whecho --init?
+  ```
+</Warning>
+
+<Warning>
+  **ValueError**: Raised when no message is provided.
+  
+  ```python
+  whecho_simple("", url="https://example.com/webhook")
+  # ValueError: No message passed. Try whecho --help for more info.
+  ```
+</Warning>
+
+## Examples
+
+### Basic Notification
+
+```python
+from whecho.whecho import whecho_simple
+
+# Send a simple message using default configured webhook
+whecho_simple("Task completed!")
+```
+
+### With Custom Webhook URL
+
+```python
+from whecho.whecho import whecho_simple
+import os
+
+# Use environment variable for webhook URL
+webhook_url = os.getenv("DISCORD_WEBHOOK")
+whecho_simple("Deployment started", url=webhook_url)
+```
+
+### Debug Mode
+
+```python
+from whecho.whecho import whecho_simple
+
+# Enable debug mode to get response object
+response = whecho_simple(
+    "Debug test message",
+    url="https://discord.com/api/webhooks/...",
+    debug=True
+)
+
+if response:
+    print(f"Status: {response.status_code}")
+    print(f"Headers: {response.headers}")
+```
+
+### Error Handling
+
+```python
+from whecho.whecho import whecho_simple
+import requests
+
+try:
+    whecho_simple("Test message", url="https://invalid-webhook.com")
+except ValueError as e:
+    print(f"Configuration error: {e}")
+except requests.exceptions.HTTPError as e:
+    print(f"HTTP error occurred: {e}")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+```
+
+### Integration with Logging
+
+```python
+import logging
+from whecho.whecho import whecho_simple
+
+logger = logging.getLogger(__name__)
+
+def notify_webhook(message, level="info"):
+    """Send log messages to webhook for important events."""
+    try:
+        whecho_simple(f"[{level.upper()}] {message}")
+        logger.info(f"Webhook notification sent: {message}")
+    except Exception as e:
+        logger.error(f"Failed to send webhook: {e}")
+
+# Usage
+notify_webhook("Application started", level="info")
+notify_webhook("Critical error detected!", level="error")
+```
+
+### Automation Script Example
+
+```python
+from whecho.whecho import whecho_simple
+import subprocess
+import platform
+import sys
+
+def run_tests():
+    """Run tests and send webhook notification with results."""
+    system_info = f"{platform.system()} {platform.release()}"
+    
+    try:
+        # Run pytest
+        result = subprocess.run(
+            ["pytest", "tests/"],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            whecho_simple(f"✅ Tests passed on {system_info}")
+        else:
+            whecho_simple(f"❌ Tests failed on {system_info}\n{result.stdout}")
+            sys.exit(1)
+    except Exception as e:
+        whecho_simple(f"⚠️ Test execution error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    run_tests()
+```
+
+### Data Processing Pipeline
+
+```python
+from whecho.whecho import whecho_simple
+import pandas as pd
+from datetime import datetime
+
+def process_data(file_path):
+    """Process data and send progress notifications."""
+    start_time = datetime.now()
+    
+    whecho_simple(f"🚀 Starting data processing: {file_path}")
+    
+    try:
+        # Load and process data
+        df = pd.read_csv(file_path)
+        processed_df = df.dropna().drop_duplicates()
+        
+        # Calculate statistics
+        duration = (datetime.now() - start_time).total_seconds()
+        rows_processed = len(processed_df)
+        
+        # Send completion notification
+        message = f"""✅ Data processing complete!
+        - File: {file_path}
+        - Rows processed: {rows_processed:,}
+        - Duration: {duration:.2f}s
+        """
+        whecho_simple(message)
+        
+        return processed_df
+    
+    except Exception as e:
+        whecho_simple(f"❌ Processing failed: {e}")
+        raise
+
+# Usage
+process_data("data/input.csv")
+```
+
+### Multiple Webhook Targets
+
+```python
+from whecho.whecho import whecho_simple
+import os
+
+class WebhookNotifier:
+    """Send notifications to multiple webhook services."""
+    
+    def __init__(self):
+        self.discord_url = os.getenv("DISCORD_WEBHOOK")
+        self.slack_url = os.getenv("SLACK_WEBHOOK")
+        self.teams_url = os.getenv("TEAMS_WEBHOOK")
+    
+    def notify_all(self, message):
+        """Send message to all configured webhooks."""
+        webhooks = [
+            ("Discord", self.discord_url),
+            ("Slack", self.slack_url),
+            ("Teams", self.teams_url)
+        ]
+        
+        for name, url in webhooks:
+            if url:
+                try:
+                    whecho_simple(message, url=url)
+                    print(f"✓ Sent to {name}")
+                except Exception as e:
+                    print(f"✗ Failed to send to {name}: {e}")
+
+# Usage
+notifier = WebhookNotifier()
+notifier.notify_all("Deployment to production completed")
+```
+
+## Supported Webhook Platforms
+
+The `whecho_simple()` function automatically detects and formats messages for:
+
+<Tabs>
+  <Tab title="Discord">
+    ```python
+    whecho_simple(
+        "Hello from Discord!",
+        url="https://discord.com/api/webhooks/..."
+    )
+    ```
+    
+    Message format: `{'username': 'user@machine', 'content': 'message'}`
+  </Tab>
+  
+  <Tab title="Slack">
+    ```python
+    whecho_simple(
+        "Hello from Slack!",
+        url="https://hooks.slack.com/services/..."
+    )
+    ```
+    
+    Message format: `{'text': 'message'}`
+  </Tab>
+  
+  <Tab title="Microsoft Teams">
+    ```python
+    whecho_simple(
+        "Hello from Teams!",
+        url="https://webhook.office.com/webhookb2/..."
+    )
+    ```
+    
+    Message format: `{'text': 'message'}`
+  </Tab>
+  
+  <Tab title="Webex">
+    ```python
+    whecho_simple(
+        "**Hello** from Webex!",  # Supports markdown
+        url="https://webexapis.com/v1/webhooks/incoming/..."
+    )
+    ```
+    
+    Message format: `{'markdown': 'message'}`
+  </Tab>
+</Tabs>
+
+<Note>
+  For unsupported webhook services, whecho attempts to send a generic JSON payload with a `text` field.
+</Note>
+
+## Type Hints
+
+whecho includes full type hints for IDE support:
+
+```python
+from typing import Optional
+import requests
+
+def whecho_simple(
+    msg: str,
+    url: str = "",
+    debug: bool = False
+) -> Optional[requests.models.Response]:
+    ...
+```
+
+## Configuration Loading
+
+When `url` parameter is empty or not provided, whecho automatically:
+
+1. Loads the configuration file from the OS-specific location
+2. Retrieves the `default_url` from config
+3. Uses that URL for the webhook request
+
+See [Configuration](/usage/configuration) for details on config file locations and structure.
+
+## Best Practices
+
+<Tip>
+  Store webhook URLs in environment variables or config files, never hardcode them in your source code.
+</Tip>
+
+<Tip>
+  Use debug mode during development to inspect the actual HTTP requests being made.
+</Tip>
+
+<Tip>
+  Wrap webhook calls in try-except blocks to prevent notification failures from crashing your application.
+</Tip>
+
+<Tip>
+  For production use, consider implementing retry logic for transient network failures.
+</Tip>

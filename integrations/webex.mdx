@@ -1,0 +1,138 @@
+---
+title: 'Webex Integration'
+description: 'Send webhook notifications to Cisco Webex spaces'
+---
+
+## Overview
+
+Whecho automatically detects Webex webhooks and formats messages appropriately. Webex webhooks are identified by URLs containing `webexapis.com`.
+
+## Setup
+
+<Steps>
+  <Step title="Create a Webex Incoming Webhook">
+    1. Open Webex and navigate to the space where you want to receive notifications
+    2. Click the space name and select **Manage apps**
+    3. Search for "Incoming Webhooks" and add it to your space
+    4. Give your webhook a name
+    5. Copy the webhook URL provided
+    
+    <Info>
+      For detailed instructions, see the [Webex Incoming Webhooks Documentation](https://developer.webex.com/docs/api/guides/webhooks)
+    </Info>
+  </Step>
+  
+  <Step title="Configure Whecho">
+    Set your Webex webhook URL as the default:
+    
+    ```bash
+    whecho --init
+    ```
+    
+    Or use it directly in commands:
+    
+    ```bash
+    whecho "Your message" --url https://webexapis.com/v1/webhooks/incoming/YOUR_WEBHOOK_ID
+    ```
+  </Step>
+</Steps>
+
+## Message Format
+
+Webex messages sent by whecho use the following JSON payload structure:
+
+```json
+{
+  "markdown": "Your message here"
+}
+```
+
+### Payload Fields
+
+- **markdown**: The message content you provide to whecho, rendered as markdown in Webex
+
+<Note>
+  Webex uses the `markdown` field instead of `text`, which means your messages are automatically formatted using markdown syntax.
+</Note>
+
+## Markdown Support
+
+Webex supports rich markdown formatting in messages:
+
+<CodeGroup>
+```markdown Text Formatting
+**bold text**
+*italic text*
+~~strikethrough~~
+`code`
+```
+
+```markdown Lists
+- Bullet point 1
+- Bullet point 2
+
+1. Numbered item 1
+2. Numbered item 2
+```
+
+```markdown Links and Code Blocks
+[Link text](https://example.com)
+
+```code
+code block
+```
+```
+</CodeGroup>
+
+## Example Usage
+
+<CodeGroup>
+```bash Basic Message
+whecho "Build completed successfully!"
+```
+
+```bash Markdown Formatting
+whecho "**Build Status**: Deployment *completed* with \`exit code 0\`"
+```
+
+```bash With Links
+whecho "Deployment finished. View logs at [Jenkins](https://jenkins.example.com/job/123)"
+```
+
+```bash With Custom URL
+whecho "Alert notification" --url https://webexapis.com/v1/webhooks/incoming/YOUR_ID
+```
+</CodeGroup>
+
+## How It Appears in Webex
+
+Messages appear in your Webex space with:
+- The webhook name you configured during setup
+- Message content rendered with markdown formatting
+- A bot indicator next to the message
+
+<Info>
+  Take advantage of markdown formatting to make your notifications more readable and structured.
+</Info>
+
+## Tips and Best Practices
+
+<Accordion title="Use markdown for structured notifications">
+  Format important information with bold text, use code blocks for technical details, and add links to related resources.
+</Accordion>
+
+<Accordion title="Create dedicated spaces">
+  Set up separate Webex spaces for different types of notifications (production alerts, CI/CD, monitoring) to keep them organized.
+</Accordion>
+
+<Accordion title="Test markdown formatting">
+  Send test messages to verify how your markdown will be rendered in Webex before using it in production scripts.
+</Accordion>
+
+<Accordion title="Mention people when needed">
+  While whecho sends basic messages, you can include @mentions in your markdown to notify specific team members.
+</Accordion>
+
+<Accordion title="Consider message frequency">
+  Be mindful of notification frequency to avoid overwhelming your team with too many automated messages.
+</Accordion>

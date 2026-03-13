@@ -1,0 +1,237 @@
+---
+title: 'Generic Webhooks'
+description: 'Send notifications to any webhook service'
+---
+
+## Overview
+
+Whecho supports sending notifications to any webhook endpoint that accepts JSON payloads. When a webhook URL doesn't match any of the supported platforms (Discord, Slack, Webex, or Teams), whecho automatically uses a generic webhook format.
+
+## How Detection Works
+
+Whecho automatically detects the webhook type based on the URL:
+
+<CodeGroup>
+```python URL Detection Logic
+url_keyword_map = {
+    "discord.com": get_discord_data,
+    "discordapp.com": get_discord_data,
+    "slack.com": get_slack_data,
+    "webhook.office.com": get_teams_data,
+    "webexapis.com": get_webex_data
+}
+
+# If URL doesn't contain any of these keywords,
+# generic webhook format is used
+```
+</CodeGroup>
+
+If your webhook URL doesn't contain any of the recognized keywords, whecho will:
+1. Detect it as an unsupported platform
+2. Attempt to send using the generic webhook format
+3. Use a simple JSON payload with a `text` field
+
+<Info>
+  This fallback mechanism ensures whecho can work with virtually any webhook service that accepts JSON POST requests.
+</Info>
+
+## Message Format
+
+Generic webhooks use the following JSON payload structure:
+
+```json
+{
+  "text": "Your message here"
+}
+```
+
+### Payload Fields
+
+- **text**: The message content you provide to whecho
+
+<Note>
+  This is a widely-supported format used by many webhook services, including Slack, Teams, Mattermost, Rocket.Chat, and others.
+</Note>
+
+## When to Use Generic Webhooks
+
+Use generic webhooks for:
+
+- **Custom webhook endpoints**: Your own API or service that accepts JSON payloads
+- **Unsupported platforms**: Chat platforms or notification services not explicitly supported by whecho
+- **Internal tools**: Company-specific notification systems
+- **Testing**: Webhook testing services like webhook.site or requestbin.com
+- **Integration platforms**: Zapier, IFTTT, n8n, or similar automation tools
+
+## Setup
+
+<Steps>
+  <Step title="Obtain Your Webhook URL">
+    Get the webhook URL from your target service. This could be:
+    - A custom API endpoint you've built
+    - A webhook URL from a service like Mattermost or Rocket.Chat
+    - An integration platform webhook URL
+    - A webhook testing URL for development
+  </Step>
+  
+  <Step title="Configure Whecho">
+    Set your webhook URL as the default:
+    
+    ```bash
+    whecho --init
+    ```
+    
+    Or use it directly in commands:
+    
+    ```bash
+    whecho "Your message" --url https://your-webhook-service.com/webhook/endpoint
+    ```
+  </Step>
+  
+  <Step title="Test the Connection">
+    Send a test message to verify the webhook is working:
+    
+    ```bash
+    whecho "Test notification" --debug
+    ```
+    
+    The `--debug` flag will show you the exact payload being sent and any response from the server.
+  </Step>
+</Steps>
+
+## Example Usage
+
+<CodeGroup>
+```bash Basic Message
+whecho "Task completed"
+```
+
+```bash Custom Webhook
+whecho "Build finished" --url https://my-api.example.com/notifications
+```
+
+```bash With Debug Mode
+whecho "Test message" --url https://webhook.site/unique-id --debug
+```
+
+```bash Mattermost Example
+whecho "Deployment complete" --url https://mattermost.example.com/hooks/abc123def456
+```
+</CodeGroup>
+
+## Compatible Services
+
+The generic webhook format works with many services:
+
+<Accordion title="Mattermost">
+  Mattermost incoming webhooks accept the `{"text": "message"}` format by default.
+  
+  [Mattermost Webhook Documentation](https://developers.mattermost.com/integrate/webhooks/incoming/)
+</Accordion>
+
+<Accordion title="Rocket.Chat">
+  Rocket.Chat supports simple text webhooks with the same payload format.
+  
+  [Rocket.Chat Webhook Documentation](https://docs.rocket.chat/use-rocket.chat/workspace-administration/integrations)
+</Accordion>
+
+<Accordion title="Zulip">
+  Zulip webhooks can accept text payloads, though they may require additional fields depending on configuration.
+</Accordion>
+
+<Accordion title="Custom APIs">
+  If you're building your own webhook endpoint, accepting a JSON payload with a `text` field is simple:
+  
+  ```python Python Example
+  from flask import Flask, request
+  
+  app = Flask(__name__)
+  
+  @app.route('/webhook', methods=['POST'])
+  def webhook():
+      data = request.get_json()
+      message = data.get('text', '')
+      # Process the message
+      return {'status': 'success'}
+  ```
+</Accordion>
+
+<Accordion title="Webhook Testing Services">
+  Test your webhooks with services like:
+  - [webhook.site](https://webhook.site) - Inspect webhook payloads
+  - [requestbin.com](https://requestbin.com) - Debug HTTP requests
+  - [Beeceptor](https://beeceptor.com) - Mock API endpoints
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Webhook not receiving messages">
+  **Solutions**:
+  - Verify the webhook URL is correct and accessible
+  - Use `--debug` flag to see the exact request and response
+  - Check if your webhook endpoint requires authentication headers
+  - Ensure the endpoint accepts POST requests with JSON content
+  - Test with curl to isolate the issue:
+    ```bash
+    curl -X POST -H "Content-Type: application/json" \
+      -d '{"text":"test"}' YOUR_WEBHOOK_URL
+    ```
+</Accordion>
+
+<Accordion title="Service expects different payload format">
+  **Problem**: Your webhook service doesn't recognize the `text` field
+  
+  **Solutions**:
+  - Check your service's documentation for the expected payload format
+  - If the service requires a different field name (like `message`, `body`, or `content`), you may need to use a proxy or wrapper
+  - Consider creating a middleware endpoint that transforms whecho's payload to your service's format
+  - Some services allow payload customization in their webhook settings
+</Accordion>
+
+<Accordion title="Authentication required">
+  **Problem**: Webhook endpoint requires authentication headers or tokens
+  
+  **Solutions**:
+  - Currently, whecho doesn't support custom headers
+  - Include authentication in the URL if supported (e.g., `https://api.example.com/webhook?token=YOUR_TOKEN`)
+  - Use a proxy or middleware that adds required authentication
+  - Consider using an integration platform like Zapier as an intermediary
+</Accordion>
+
+<Accordion title="SSL/TLS certificate errors">
+  **Problem**: Connection fails with certificate errors
+  
+  **Solutions**:
+  - Ensure your webhook endpoint uses a valid SSL certificate
+  - Check that the certificate is not expired
+  - Verify the hostname matches the certificate
+  - For development, use webhook testing services with valid certificates
+</Accordion>
+
+<Accordion title="Rate limiting">
+  **Problem**: Some messages are not being delivered
+  
+  **Solutions**:
+  - Check if your webhook service has rate limits
+  - Add delays between messages if sending many notifications
+  - Review your service's documentation for rate limit information
+  - Consider batching messages if possible
+</Accordion>
+
+## Debug Mode
+
+Use debug mode to troubleshoot webhook issues:
+
+```bash
+whecho "Debug test" --url https://your-webhook.com/endpoint --debug
+```
+
+Debug mode shows:
+- The exact JSON payload being sent
+- The HTTP response status code
+- Any error messages from the server
+- Which webhook type was detected (or if generic was used)
+
+<Note>
+  Debug output is printed to the console and can help identify payload format issues, authentication problems, or network errors.
+</Note>

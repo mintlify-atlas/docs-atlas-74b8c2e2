@@ -1,0 +1,344 @@
+---
+title: FAQ
+description: Frequently asked questions about whecho
+---
+
+<AccordionGroup>
+  <Accordion title="What platforms are supported?">
+    whecho supports the following webhook platforms:
+
+    - **Discord** (discord.com, discordapp.com)
+    - **Slack** (slack.com)
+    - **Microsoft Teams** (webhook.office.com)
+    - **Webex** (webexapis.com)
+    - **Generic webhooks** (any webhook that accepts JSON with a `text` field)
+
+    The platform is automatically detected based on the webhook URL. If your URL doesn't match a known platform, whecho will attempt to send it as a generic webhook with a `text` field.
+
+    **Source:** Platform detection in `_send_message.py:31-42`
+  </Accordion>
+
+  <Accordion title="How do I change my webhook URL?">
+    To change your default webhook URL, run:
+
+    ```bash
+    whecho --init
+    ```
+
+    You'll see a menu with your current configuration. Enter `default_url` or the number next to it, then provide your new webhook URL.
+
+    Example:
+    ```
+    Current config:
+    [1] default_url: https://old-webhook.com
+    [2] user: john
+    [3] machine: auto
+
+    Please enter the number/name of the config option you would like to modify (empty or Q to exit): 1
+    Please enter the new value for default_url: https://new-webhook.com
+    Successfully modified default_url to https://new-webhook.com!
+    ```
+
+    Press Q or Enter to save and exit.
+  </Accordion>
+
+  <Accordion title="Can I use multiple webhooks?">
+    Yes! You have two options:
+
+    **Option 1: Override with `-u` flag**
+    ```bash
+    whecho -u "https://webhook1.com" "Message to webhook 1"
+    whecho -u "https://webhook2.com" "Message to webhook 2"
+    ```
+
+    **Option 2: Change default URL as needed**
+    ```bash
+    whecho --init  # Set webhook 1 as default
+    whecho "Message to webhook 1"
+    whecho --init  # Change to webhook 2
+    whecho "Message to webhook 2"
+    ```
+
+    The `-u` flag is recommended for sending to different webhooks without changing your configuration.
+  </Accordion>
+
+  <Accordion title="How do I see what's being sent?">
+    Use the `-d` or `--debug` flag to enable debug mode:
+
+    ```bash
+    whecho -d "Test message"
+    ```
+
+    Debug mode shows:
+    - Command-line arguments parsed
+    - Configuration loaded
+    - Detected webhook platform
+    - JSON payload being sent
+    - HTTP response received
+
+    Example output:
+    ```
+    Arguments passed: Namespace(debug=True, init=False, msg=None, message=['Test message'], url=None, version=False)
+    Config pulled from: /home/user/.config/.whecho/config.toml
+    Config: {'default_url': 'https://discord.com/api/webhooks/...', 'version': '1.0.0', 'user': 'john', 'os': 'Linux', 'machine': 'auto'}
+    Message: Test message
+    Detected discord.com in URL
+    Data: {'username': 'john@hostname', 'content': 'Test message'}
+    Response: <Response [204]>
+    ```
+
+    **Source:** Debug implementation throughout `_utilities.py` and `_send_message.py`
+  </Accordion>
+
+  <Accordion title="Where is the config file stored?">
+    The configuration file location depends on your operating system:
+
+    **Linux:**
+    ```
+    ~/.config/.whecho/config.toml
+    ```
+
+    **Windows:**
+    ```
+    %USERPROFILE%\AppData\Roaming\.whecho\config.toml
+    ```
+
+    **macOS:**
+    ```
+    ~/Library/Application Support/.whecho/config.toml
+    ```
+
+    The config file is in TOML format and contains:
+    - `default_url`: Your webhook URL
+    - `version`: whecho version
+    - `user`: Username for messages
+    - `os`: Operating system
+    - `machine`: Machine name
+
+    **Source:** Config paths defined in `_config.py:26-28`
+  </Accordion>
+
+  <Accordion title="Does whecho work on Windows?">
+    Yes! whecho fully supports Windows, Linux, and macOS.
+
+    **Windows-specific notes:**
+    - Config is stored in `AppData\Roaming\.whecho\`
+    - The tool handles Windows-specific edge cases (like `getpass.getuser()` failures)
+    - All commands work the same way as on Linux/macOS
+
+    **Testing on Windows:**
+    whecho includes specific error handling for Windows environments where `getpass.getuser()` might fail, automatically falling back to a default username.
+
+    **Source:** Windows support in `_config.py:13-17` and `_config.py:27`
+  </Accordion>
+
+  <Accordion title="Can I use whecho in Python scripts?">
+    Yes! Use the `whecho_simple()` function:
+
+    ```python
+    from whecho.whecho import whecho_simple
+
+    # Send to default URL (from config)
+    whecho_simple("Task completed successfully!")
+
+    # Send to specific URL
+    whecho_simple(
+        "Build finished!",
+        url="https://your-webhook-url.com"
+    )
+
+    # Enable debug mode and get response
+    response = whecho_simple(
+        "Debug test",
+        url="https://your-webhook-url.com",
+        debug=True
+    )
+    print(response.status_code)
+    ```
+
+    **Parameters:**
+    - `msg` (str, required): The message to send
+    - `url` (str, optional): Webhook URL (uses config default if empty)
+    - `debug` (bool, optional): Enable debug output and return response object
+
+    **Returns:**
+    - `None` by default
+    - `requests.Response` object if `debug=True`
+
+    **Source:** Function defined in `whecho.py:28-37`
+  </Accordion>
+
+  <Accordion title="How do I customize the message format?">
+    The message format depends on the webhook platform:
+
+    **Discord:**
+    - Displays as: `username@machine: message`
+    - Username and machine can be customized via `whecho --init`
+    - Supports Discord markdown formatting
+
+    **Slack, Teams:**
+    - Sends plain text messages
+    - The message is sent as-is
+
+    **Webex:**
+    - Supports markdown formatting
+    - Use standard markdown syntax in your message
+
+    **Customizing username and machine:**
+    ```bash
+    whecho --init
+    # Select 'user' to change username
+    # Select 'machine' to change machine name (or use 'auto' for hostname)
+    ```
+
+    **Example with custom machine name:**
+    ```bash
+    whecho --init
+    # Set machine to "production-server"
+    whecho "Deployment complete"
+    # Discord shows: "yourname@production-server: Deployment complete"
+    ```
+
+    **Source:** Message formatting in `_send_message.py:49-73`
+  </Accordion>
+
+  <Accordion title="What happens if the webhook fails?">
+    whecho includes comprehensive error handling:
+
+    **HTTP Errors:**
+    - If the webhook returns an HTTP error, whecho catches it and prints the error message
+    - The error is not silently ignored
+    - Use debug mode to see the full response
+
+    **Connection Errors:**
+    - Network timeouts and connection failures are caught by the `requests` library
+    - Error messages will indicate the type of failure
+
+    **Example error handling:**
+    ```bash
+    whecho -u "https://invalid-webhook.com" "test"
+    # Prints HTTP error if webhook is invalid
+
+    whecho -d -u "https://invalid-webhook.com" "test"
+    # Shows detailed error information
+    ```
+
+    **Common HTTP errors:**
+    - `404`: Webhook not found (URL incorrect or webhook deleted)
+    - `400`: Bad request (malformed data)
+    - `429`: Rate limited (too many requests)
+    - `401/403`: Authentication/authorization error
+
+    **Source:** Error handling in `_send_message.py:19-27`
+  </Accordion>
+
+  <Accordion title="How do I uninstall or reset the config?">
+    To reset whecho configuration:
+
+    **Option 1: Delete the config file**
+
+    Linux:
+    ```bash
+    rm ~/.config/.whecho/config.toml
+    ```
+
+    Windows (PowerShell):
+    ```powershell
+    Remove-Item ~\AppData\Roaming\.whecho\config.toml
+    ```
+
+    macOS:
+    ```bash
+    rm ~/Library/Application\ Support/.whecho/config.toml
+    ```
+
+    **Option 2: Delete the entire config directory**
+
+    Linux:
+    ```bash
+    rm -rf ~/.config/.whecho
+    ```
+
+    Windows (PowerShell):
+    ```powershell
+    Remove-Item -Recurse ~\AppData\Roaming\.whecho
+    ```
+
+    macOS:
+    ```bash
+    rm -rf ~/Library/Application\ Support/.whecho
+    ```
+
+    After deleting the config, run `whecho --init` to create a fresh configuration.
+
+    **To completely uninstall whecho:**
+    ```bash
+    pip uninstall whecho
+    # Then delete the config directory as shown above
+    ```
+  </Accordion>
+
+  <Accordion title="What is the 'auto' machine name?">
+    When the machine name is set to `"auto"`, whecho automatically uses your computer's hostname.
+
+    **How it works:**
+    - During initialization, the default machine name is `"auto"`
+    - When sending a message, if machine is `"auto"`, it's replaced with `socket.gethostname()`
+    - This allows the same config to work across different machines
+
+    **Example:**
+    ```bash
+    whecho --init
+    # Set machine to "auto" (or leave as default)
+    whecho "Test message"
+    # On a computer named "laptop-1", Discord shows: "user@laptop-1: Test message"
+    # On a computer named "desktop-2", Discord shows: "user@desktop-2: Test message"
+    ```
+
+    **Setting a custom machine name:**
+    ```bash
+    whecho --init
+    # Select 'machine' and enter a custom name like "production"
+    whecho "Deploy complete"
+    # Shows: "user@production: Deploy complete"
+    ```
+
+    **Source:** Auto hostname resolution in `_config.py:92-93`
+  </Accordion>
+
+  <Accordion title="Can I use environment variables for the webhook URL?">
+    While whecho doesn't natively support environment variables, you can use shell substitution:
+
+    **Bash/Linux/macOS:**
+    ```bash
+    export WEBHOOK_URL="https://your-webhook-url.com"
+    whecho -u "$WEBHOOK_URL" "Your message"
+    ```
+
+    **PowerShell:**
+    ```powershell
+    $env:WEBHOOK_URL = "https://your-webhook-url.com"
+    whecho -u $env:WEBHOOK_URL "Your message"
+    ```
+
+    **In Python scripts:**
+    ```python
+    import os
+    from whecho.whecho import whecho_simple
+
+    webhook_url = os.environ.get('WEBHOOK_URL')
+    whecho_simple("Your message", url=webhook_url)
+    ```
+
+    **In CI/CD pipelines:**
+    ```yaml
+    # GitHub Actions example
+    - name: Send notification
+      env:
+        WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+      run: whecho -u "$WEBHOOK_URL" "Build completed!"
+    ```
+
+    This approach is recommended for CI/CD environments where you don't want to store webhook URLs in config files.
+  </Accordion>
+</AccordionGroup>
