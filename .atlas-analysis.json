@@ -1,0 +1,66 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "whecho",
+  "projectDescription": "Linux echo with webhooks - send notifications to Discord, Slack, Webex, and more from the command line",
+  "theme": "palm",
+  "primaryColor": "#22bd7a",
+  "lightColor": "#0f0d51",
+  "darkColor": "#cee1df",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Usage",
+            "pages": [
+              "usage/cli-commands",
+              "usage/python-api",
+              "usage/configuration"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "integrations/discord",
+              "integrations/slack",
+              "integrations/webex",
+              "integrations/teams",
+              "integrations/generic"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/troubleshooting",
+              "reference/faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Send webhook notifications from command line",
+    "Python API for programmatic notifications",
+    "Support for Discord, Slack, Webex, and Teams",
+    "Cross-platform support (Linux, Windows, macOS)",
+    "Simple configuration management",
+    "Automatic machine and user detection"
+  ],
+  "publicApiSurface": [
+    "whecho [message] - Send a message via webhook",
+    "whecho --init - Initialize configuration",
+    "whecho -u [url] [message] - Send message to specific URL",
+    "whecho --version - Show version",
+    "whecho_simple(msg, url, debug) - Python API function"
+  ]
+}
